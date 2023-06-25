@@ -120,33 +120,41 @@ local function defer_save(buf)
 end
 
 function M.on()
-  api.nvim_create_autocmd(cnf.opts.trigger_events.immediate_save, {
-    callback = function(opts)
-      if should_be_saved(opts.buf) then
-        immediate_save(opts.buf)
-      end
-    end,
-    group = "AutoSave",
-    desc = "Immediately save a buffer",
-  })
-  api.nvim_create_autocmd(cnf.opts.trigger_events.defer_save, {
-    callback = function(opts)
-      if should_be_saved(opts.buf) then
-        defer_save(opts.buf)
-      end
-    end,
-    group = "AutoSave",
-    desc = "Save a buffer after the `debounce_delay`",
-  })
-  api.nvim_create_autocmd(cnf.opts.trigger_events.cancel_defered_save, {
-    callback = function(opts)
-      if should_be_saved(opts.buf) then
-        cancel_timer(opts.buf)
-      end
-    end,
-    group = "AutoSave",
-    desc = "Cancel a pending save timer for a buffer",
-  })
+  if #cnf.opts.trigger_events.immediate_save > 0 then
+    api.nvim_create_autocmd(cnf.opts.trigger_events.immediate_save, {
+      callback = function(opts)
+        if should_be_saved(opts.buf) then
+          immediate_save(opts.buf)
+        end
+      end,
+      group = "AutoSave",
+      desc = "Immediately save a buffer",
+    })
+  end
+
+  if #cnf.opts.trigger_events.defer_save > 0 then
+    api.nvim_create_autocmd(cnf.opts.trigger_events.defer_save, {
+      callback = function(opts)
+        if should_be_saved(opts.buf) then
+          defer_save(opts.buf)
+        end
+      end,
+      group = "AutoSave",
+      desc = "Save a buffer after the `debounce_delay`",
+    })
+  end
+
+  if #cnf.opts.trigger_events.cancel_defered_save > 0 then
+    api.nvim_create_autocmd(cnf.opts.trigger_events.cancel_defered_save, {
+      callback = function(opts)
+        if should_be_saved(opts.buf) then
+          cancel_timer(opts.buf)
+        end
+      end,
+      group = "AutoSave",
+      desc = "Cancel a pending save timer for a buffer",
+    })
+  end
 
   api.nvim_create_autocmd({ "VimEnter", "ColorScheme", "UIEnter" }, {
     callback = function()
